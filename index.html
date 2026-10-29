@@ -1,9 +1,251 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Delaware River Chemistry Quest | Interactive Map</title><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>
-:root{font-family:system-ui,Arial,sans-serif;color:#14283b;background:#f3f7f9}*{box-sizing:border-box}body{margin:0}header{background:#102c46;color:white;padding:18px max(18px,calc((100vw - 1160px)/2))}header h1{font-size:clamp(23px,3vw,34px);margin:0 0 7px}header p{margin:0;color:#d4e9f1}.wrap{max-width:1160px;margin:auto;padding:18px;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr);gap:18px}.panel{background:white;border:1px solid #d9e3e9;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px #0b26350b}#map{height:550px;background:#eaf4f7}.panel h2{font-size:19px;margin:0 0 10px}.sidebar{padding:20px;min-height:550px}.muted{color:#536678}.small{font-size:13px}.pill{display:inline-block;background:#e9f4fb;border-radius:20px;padding:5px 10px;color:#15557a;font-size:13px;font-weight:650}.cachebuttons{display:grid;gap:7px;margin:14px 0}.cachebuttons button{padding:10px 12px;text-align:left;border:1px solid #cbdde5;background:white;border-radius:8px;font-size:14px;cursor:pointer}.cachebuttons button[aria-pressed=true]{border-color:#096a93;background:#eaf7ff;font-weight:700}.cachebuttons button.done:after{content:' ✓';color:#087c59}button:focus-visible,input:focus-visible{outline:3px solid #e69d22;outline-offset:2px}.data{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.datum{padding:9px;background:#f2f7fa;border-radius:8px;text-align:center}.datum strong{display:block;font-size:18px}.datum span{font-size:11px}.code{background:#e7f6ec;padding:12px;border-radius:8px;font-weight:700;letter-spacing:.12em;color:#17613a}.action{background:#12688c;color:white;border:0;border-radius:8px;padding:10px 15px;font-weight:700;cursor:pointer;margin-top:10px}.notice{background:#fff6df;border-left:4px solid #d4a033;padding:12px;font-size:13px}.footer{max-width:1160px;margin:0 auto 30px;padding:0 18px}.hidden{display:none}.leaflet-container{font-family:inherit}#fallback{display:none;padding:18px;background:#eaf4f7}#fallback svg{width:100%;height:auto;max-height:520px}#fallback button{margin:4px}#fallback circle{cursor:pointer} @media(max-width:760px){.wrap{grid-template-columns:1fr}#map{height:400px}.sidebar{min-height:0}}@media print{#map{height:350px}.wrap{display:block}.sidebar{min-height:0}}
-</style></head><body><header><h1>🌊 Delaware River Chemistry Quest</h1><p>Five geographic caches · One scientific mystery · Grade 11 Chemistry</p></header><main class="wrap"><section class="panel"><div id="map" aria-label="Interactive map with five geographic cache markers"></div><div id="fallback" role="region" aria-label="Simplified checkpoint map"><p><strong>Offline map view:</strong> schematic route, not to geographic scale. Select a numbered checkpoint below or use the list to the right.</p><svg viewBox="0 0 500 440" role="img" aria-label="Schematic north-to-south route of five Delaware River Basin checkpoints"><path d="M 340 20 C 275 70 310 125 250 185 S 300 255 200 300 S 250 380 185 420" fill="none" stroke="#8fc9e6" stroke-width="35" stroke-linecap="round"/><path d="M 340 20 C 275 70 310 125 250 185 S 300 255 200 300 S 250 380 185 420" fill="none" stroke="#2c86b6" stroke-width="5" stroke-linecap="round"/><g id="svgpoints"></g><text x="14" y="24" fill="#4e6c7d">N ↑ (schematic)</text></svg></div><div style="padding:12px 16px" class="small muted">Map markers are approximate educational reference points, not precise sample collection sites. Internet access is needed for the street-map background; the checkpoint list remains usable offline.</div></section><aside class="panel sidebar"><span class="pill">Interactive student mission</span><h2 style="margin-top:13px">Find and investigate each cache</h2><p class="muted small">Follow the clues. Select a map marker or checkpoint name, read the simulated evidence, answer the inquiry question, and record its discovery code on your worksheet.</p><div class="notice"><strong>Scientific integrity:</strong> All measurements are <strong>simulated instructional data</strong>, not real river samples. None establishes whether water is safe to drink.</div><div id="buttons" class="cachebuttons" aria-label="Five accessible cache selections"></div><div id="detail" aria-live="polite"><p>Select a checkpoint to begin.</p></div><p id="progress" class="small muted" aria-live="polite">0 of 5 caches visited</p></aside></main><section class="footer panel" style="padding:18px"><h2>Final scientific challenge</h2><p>Which two checkpoints show an important difference in water chemistry? Make a <strong>claim</strong>, cite <strong>two numerical readings with units</strong>, and explain your <strong>reasoning</strong>. Identify an alternative explanation and what additional evidence would help test it.</p><p class="small muted">Instructor: Omotayo Ogun · Assignment 10 · Virtual geospatial inquiry with accessible checkpoint alternatives</p></section><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script>
-const caches=[{"id": 1, "name": "Upper Delaware River", "clue": "Find the upstream river reach near the New York–Pennsylvania border.", "ph": 7.2, "conductivity": 120, "nitrate": 0.4, "question": "What does the pH suggest? Which evidence would you need before calling this water safe?", "code": "SOURCE", "lat": 41.48, "lon": -74.99}, {"id": 2, "name": "Lehigh River", "clue": "Locate the tributary that joins the Delaware near Easton.", "ph": 6.6, "conductivity": 410, "nitrate": 1.8, "question": "Compare conductivity with Cache 1. Can the difference alone establish a cause?", "code": "RIVER", "lat": 40.69, "lon": -75.2}, {"id": 3, "name": "Schuylkill River", "clue": "Find the river that meets the Delaware in Philadelphia.", "ph": 7.5, "conductivity": 330, "nitrate": 3.2, "question": "Which checkpoint has the greater nitrate reading so far? Propose, but do not assert, a possible explanation.", "code": "DATA", "lat": 39.89, "lon": -75.19}, {"id": 4, "name": "Philadelphia Waterfront", "clue": "Find the urban waterfront along the Delaware in Philadelphia.", "ph": 7.0, "conductivity": 520, "nitrate": 2.5, "question": "Which reading is highest among the first four for conductivity? What additional land-use evidence would help?", "code": "CLAIM", "lat": 39.95, "lon": -75.14}, {"id": 5, "name": "Delaware Estuary", "clue": "Follow the Delaware downstream toward Delaware Bay.", "ph": 7.8, "conductivity": 9000, "nitrate": 1.1, "question": "How might tidal saltwater mixing affect conductivity? Why should this site not be compared as if it were entirely freshwater?", "code": "EVIDENCE", "lat": 39.19, "lon": -75.38}];let selected=null;const visited=new Set();const buttons=document.getElementById('buttons');const detail=document.getElementById('detail');const progress=document.getElementById('progress');let map=null,markers={};
-function show(id){selected=id;const c=caches.find(x=>x.id===id);document.querySelectorAll('.cachebuttons button').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.id)===id)));detail.innerHTML=`<hr><h2>Cache ${c.id}: ${c.name}</h2><p><strong>Geographic clue:</strong> ${c.clue}</p><div class="data"><div class="datum"><strong>${c.ph}</strong><span>pH</span></div><div class="datum"><strong>${c.conductivity.toLocaleString()}</strong><span>Conductivity (µS/cm)</span></div><div class="datum"><strong>${c.nitrate}</strong><span>Nitrate (mg/L)</span></div></div><p><strong>Inquiry task:</strong> ${c.question}</p><p class="small muted">Record your evidence and answer on the investigation sheet before marking complete.</p><div class="code">Discovery code: ${c.code}</div><button class="action" onclick="complete(${id})">Mark cache ${id} investigated</button>`;if(map&&markers[id]){map.panTo([c.lat,c.lon]);markers[id].openPopup()}}
-function complete(id){visited.add(id);document.querySelectorAll('.cachebuttons button').forEach(b=>b.classList.toggle('done',visited.has(Number(b.dataset.id))));progress.textContent=`${visited.size} of 5 caches investigated`+(visited.size===5?' — Quest complete! Now construct your scientific explanation.':'');}
-caches.forEach(c=>{const b=document.createElement('button');b.dataset.id=c.id;b.type='button';b.textContent=`${c.id}. ${c.name}`;b.setAttribute('aria-pressed','false');b.onclick=()=>show(c.id);buttons.appendChild(b)});
-if(window.L){map=L.map('map',{scrollWheelZoom:false}).setView([40.30,-75.10],8);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap contributors'}).addTo(map);caches.forEach(c=>{const marker=L.marker([c.lat,c.lon]).addTo(map);marker.bindPopup(`<strong>Cache ${c.id}: ${c.name}</strong><br><button onclick="show(${c.id})">Open inquiry cache</button>`);marker.on('click',()=>show(c.id));markers[c.id]=marker});map.fitBounds(caches.map(c=>[c.lat,c.lon]),{padding:[35,35]})}else{document.getElementById('map').style.display='none';document.getElementById('fallback').style.display='block';const g=document.getElementById('svgpoints');[[1,340,32],[2,275,150],[3,212,265],[4,250,290],[5,185,408]].forEach(([id,x,y])=>{const n=document.createElementNS('http://www.w3.org/2000/svg','g');n.innerHTML=`<circle cx="${x}" cy="${y}" r="17" fill="#103f60" stroke="white" stroke-width="3"/><text x="${x}" y="${y+5}" text-anchor="middle" fill="white" font-size="15" font-weight="bold">${id}</text>`;n.setAttribute('tabindex','0');n.setAttribute('role','button');n.setAttribute('aria-label',`Open cache ${id}`);n.onclick=()=>show(id);n.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();show(id)}};g.appendChild(n)})}
-</script></body></html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Delaware River Chemistry Quest</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f7f9;color:#14283b}
+header{background:#102c46;color:white;padding:24px 5%}
+header h1{margin:0 0 10px;font-size:clamp(25px,3vw,38px)}
+header p{margin:0;color:#d4e9f1}
+.wrap{max-width:1250px;margin:auto;padding:20px;display:grid;grid-template-columns:1.5fr 1fr;gap:18px}
+.panel{background:white;border:1px solid #d9e3e9;border-radius:15px;overflow:hidden}
+#map{height:570px;background:#dcebf0}
+.sidebar{padding:22px}
+.sidebar h2{font-size:21px}
+.pill{display:inline-block;background:#e9f4fb;padding:8px 12px;border-radius:22px;font-weight:bold;color:#15557a}
+.notice{background:#fff6df;border-left:4px solid #d4a033;padding:14px;margin:18px 0}
+.cachebuttons{display:grid;gap:8px;margin:18px 0}
+.cachebuttons button{padding:13px;text-align:left;background:white;border:1px solid #cbdde5;border-radius:9px;cursor:pointer;font-size:15px}
+.cachebuttons button:hover,.cachebuttons button[aria-pressed="true"]{background:#eaf7ff;border-color:#096a93}
+.cachebuttons button.done:after{content:" ✓";color:green}
+.data{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.datum{background:#f2f7fa;padding:10px 5px;border-radius:8px;text-align:center}
+.datum strong{display:block;font-size:19px}
+.datum span{font-size:11px}
+.code{background:#e7f6ec;padding:12px;font-weight:bold;color:#17613a;border-radius:8px}
+.action{background:#12688c;color:white;border:0;border-radius:8px;padding:12px;cursor:pointer}
+.muted{color:#536678}
+.small{font-size:13px}
+.footer{max-width:1210px;margin:0 auto 30px;padding:20px}
+.numbered-pin{width:38px;height:38px;border-radius:50%;background:#096a93;color:white;border:3px solid white;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:19px;box-shadow:0 2px 8px #3338}
+.anchor-dot{width:10px;height:10px;background:#d99b16;border:2px solid white;border-radius:50%;box-shadow:0 0 0 1px #805800}
+button:focus-visible{outline:3px solid orange}
+@media(max-width:760px){.wrap{grid-template-columns:1fr}#map{height:440px}}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🌊 Delaware River Chemistry Quest</h1>
+<p>Five geographic caches · One scientific mystery · Grade 11 Chemistry</p>
+</header>
+
+<main class="wrap">
+<section class="panel">
+<div id="map" aria-label="Interactive geographical map with five numbered Chemistry checkpoints"></div>
+<p class="small muted" style="padding:12px">
+Map locations are approximate educational reference points, not actual sampling sites.
+Numbers 3 and 4 are offset for clarity; their guide lines indicate their geographical anchors.
+</p>
+</section>
+
+<aside class="panel sidebar">
+<span class="pill">Interactive student mission</span>
+<h2>Find and investigate each cache</h2>
+<p class="muted">
+Follow the clues. Select a numbered map marker or checkpoint name,
+read the simulated evidence, answer the inquiry question,
+and record the discovery code on your worksheet.
+</p>
+
+<div class="notice">
+<strong>Scientific integrity:</strong> All measurements are
+<strong>simulated instructional data</strong>, not real river samples.
+None establishes whether water is safe to drink.
+</div>
+
+<div id="buttons" class="cachebuttons"></div>
+<div id="detail" aria-live="polite">
+<p>Select a checkpoint to begin.</p>
+</div>
+<p id="progress" class="small muted">0 of 5 caches investigated</p>
+</aside>
+</main>
+
+<section class="panel footer">
+<h2>Final scientific challenge</h2>
+<p>
+Which two checkpoints show an important difference in water chemistry?
+Make a <strong>claim</strong>, cite <strong>two numerical readings with units</strong>,
+and explain your <strong>reasoning</strong>.
+Identify an alternative explanation and what additional evidence would help test it.
+</p>
+<p class="small muted">
+Instructor: Omotayo Ogun · Virtual geospatial inquiry
+</p>
+</section>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const caches=[
+{id:1,name:"Upper Delaware River",lat:41.48,lon:-74.99,
+clue:"Find the upstream river reach near the New York–Pennsylvania border.",
+ph:7.2,conductivity:120,nitrate:0.4,
+question:"What does the pH suggest? Which evidence would you need before calling this water safe?",
+code:"SOURCE"},
+
+{id:2,name:"Lehigh River",lat:40.69,lon:-75.20,
+clue:"Locate the tributary that joins the Delaware near Easton.",
+ph:6.6,conductivity:410,nitrate:1.8,
+question:"Compare conductivity with Cache 1. Can the difference alone establish a cause?",
+code:"RIVER"},
+
+{id:3,name:"Schuylkill River",lat:39.89,lon:-75.19,
+clue:"Find the river that meets the Delaware in Philadelphia.",
+ph:7.5,conductivity:330,nitrate:3.2,
+question:"Which checkpoint has the greater nitrate reading so far? Propose, but do not assert, a possible explanation.",
+code:"DATA"},
+
+{id:4,name:"Philadelphia Waterfront",lat:39.95,lon:-75.14,
+clue:"Find the urban waterfront along the Delaware in Philadelphia.",
+ph:7.0,conductivity:520,nitrate:2.5,
+question:"Which reading is highest among the first four for conductivity? What additional land-use evidence would help?",
+code:"CLAIM"},
+
+{id:5,name:"Delaware Estuary",lat:39.19,lon:-75.38,
+clue:"Follow the Delaware downstream toward Delaware Bay.",
+ph:7.8,conductivity:9000,nitrate:1.1,
+question:"How might tidal saltwater mixing affect conductivity? Why should this site not be compared as if it were entirely freshwater?",
+code:"EVIDENCE"}
+];
+
+const visited=new Set();
+const buttons=document.getElementById("buttons");
+const detail=document.getElementById("detail");
+const progress=document.getElementById("progress");
+let map;
+const markers={};
+
+function show(id){
+const c=caches.find(x=>x.id===id);
+document.querySelectorAll(".cachebuttons button").forEach(b=>{
+b.setAttribute("aria-pressed",String(Number(b.dataset.id)===id));
+});
+detail.innerHTML=`
+<hr>
+<h2>Cache ${c.id}: ${c.name}</h2>
+<p><strong>Geographic clue:</strong> ${c.clue}</p>
+<div class="data">
+<div class="datum"><strong>${c.ph}</strong><span>pH</span></div>
+<div class="datum"><strong>${c.conductivity.toLocaleString()}</strong><span>Conductivity (µS/cm)</span></div>
+<div class="datum"><strong>${c.nitrate}</strong><span>Nitrate (mg/L)</span></div>
+</div>
+<p><strong>Inquiry task:</strong> ${c.question}</p>
+<p class="small muted">Record your evidence and reasoning before marking complete.</p>
+<div class="code">Discovery code: ${c.code}</div>
+<button class="action" onclick="complete(${id})">Mark cache ${id} investigated</button>
+`;
+if(map&&markers[id]){
+markers[id].openPopup();
+}
+}
+
+function complete(id){
+visited.add(id);
+document.querySelectorAll(".cachebuttons button").forEach(b=>{
+b.classList.toggle("done",visited.has(Number(b.dataset.id)));
+});
+progress.textContent=`${visited.size} of 5 caches investigated`;
+if(visited.size===5){
+progress.textContent+=" — Quest complete! Construct your scientific explanation.";
+}
+}
+
+caches.forEach(c=>{
+const b=document.createElement("button");
+b.type="button";
+b.dataset.id=c.id;
+b.textContent=`${c.id}. ${c.name}`;
+b.setAttribute("aria-pressed","false");
+b.onclick=()=>show(c.id);
+buttons.appendChild(b);
+});
+
+if(window.L){
+map=L.map("map",{scrollWheelZoom:false}).setView([40.3,-75.1],8);
+
+// Esri topographic background
+const esri=L.tileLayer(
+"https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+{attribution:"Tiles © Esri; data providers",maxZoom:18}
+);
+
+// CARTO alternative
+const carto=L.tileLayer(
+"https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+{attribution:"© OpenStreetMap contributors © CARTO",maxZoom:19}
+);
+
+esri.addTo(map);
+L.control.layers({"Topographic map":esri,"Light street map":carto}).addTo(map);
+
+// Displayed positions are adjusted ONLY for caches 3 and 4.
+// The original geographic coordinates remain unchanged.
+const displayPositions={
+1:[41.48,-74.99],
+2:[40.69,-75.20],
+3:[39.82,-75.29],
+4:[40.02,-75.04],
+5:[39.19,-75.38]
+};
+
+caches.forEach(c=>{
+const actual=[c.lat,c.lon];
+const displayed=displayPositions[c.id];
+
+const icon=L.divIcon({
+className:"",
+html:`<div class="numbered-pin">${c.id}</div>`,
+iconSize:[38,38],
+iconAnchor:[19,19]
+});
+
+if(c.id===3||c.id===4){
+L.polyline([actual,displayed],{
+color:"#b07808",
+weight:2,
+dashArray:"4,5",
+opacity:0.9,
+interactive:false
+}).addTo(map);
+
+L.circleMarker(actual,{
+radius:5,
+color:"#805800",
+fillColor:"#d99b16",
+fillOpacity:1,
+weight:2
+}).addTo(map).bindTooltip(`Actual map reference: Cache ${c.id}`);
+}
+
+const marker=L.marker(displayed,{icon}).addTo(map);
+marker.bindPopup(`<strong>Cache ${c.id}: ${c.name}</strong><br>Select this checkpoint from the list or click its number.`);
+marker.on("click",()=>show(c.id));
+markers[c.id]=marker;
+});
+
+map.fitBounds(caches.map(c=>[c.lat,c.lon]),{padding:[45,45]});
+setTimeout(()=>map.invalidateSize(),250);
+
+}else{
+document.getElementById("map").innerHTML=
+"<p style='padding:20px'>The map library could not load. Please use the numbered checkpoint list to investigate the five sites.</p>";
+}
+</script>
+</body>
+</html>
